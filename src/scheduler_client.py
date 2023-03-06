@@ -18,11 +18,7 @@ class Scheduler:
                 resource = self.get_next_available_resource()
                 if resource is not None:
                     threading.Thread(target=resource.assign_task, args=(task,)).start()
-                else:
-                    self.tasks.append(task)
                 self.lock.release()
-            if self.is_all_tasks_completed():
-                sys.exit()
             time.sleep(random.randint(1, 3))
     
     def get_next_task(self):
@@ -43,4 +39,4 @@ class Scheduler:
         self.all_tasks_completed = True
     
     def is_all_tasks_completed(self):
-        return len(self.tasks) == 0 and all([resource.is_busy() for resource in self.resources])
+        return len(self.tasks) == 0 and all([not resource.is_busy() for resource in self.resources])

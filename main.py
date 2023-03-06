@@ -12,6 +12,7 @@ def main():
             scheduler.lock.release()
             break
         scheduler.lock.release()
+        
         time.sleep(random.randint(1, 5))
 
 
