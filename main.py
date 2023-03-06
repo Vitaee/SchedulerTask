@@ -7,7 +7,8 @@ def main():
 
     while True:
         scheduler.lock.acquire()
-        if len(scheduler.tasks) == 0 or scheduler.all_tasks_completed() == 0:
+        if scheduler.is_all_tasks_completed():
+            scheduler.mark_all_tasks_completed()
             scheduler.lock.release()
             break
         scheduler.lock.release()

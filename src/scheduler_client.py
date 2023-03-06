@@ -1,15 +1,17 @@
 from .resource_client import Resource
 from .task_client import Task
-import threading, time, random
+import threading, time, random, sys
 
 class Scheduler:
     def __init__(self, num_resources, num_projects):
         self.tasks = [Task(project=f"Project {i}", priority=i) for i in range(1, num_projects+1)]
         self.resources = [Resource(i) for i in range(1, num_resources+1)]
         self.lock = threading.Lock()
+        self.all_tasks_completed = False
+
     
     def assign_task_to_resource(self):
-        while True:
+        while not self.all_tasks_completed:
             task = self.get_next_task()
             if task is not None:
                 self.lock.acquire()
@@ -19,14 +21,15 @@ class Scheduler:
                 else:
                     self.tasks.append(task)
                 self.lock.release()
-            if self.all_tasks_completed == 0:
-                return 
+            if self.is_all_tasks_completed():
+                sys.exit()
             time.sleep(random.randint(1, 3))
     
     def get_next_task(self):
         if len(self.tasks) > 0:
-            self.tasks.sort(key=lambda x: x.priority, reverse=True)
-            return self.tasks.pop(0)
+            highest_priority_task = max(self.tasks, key=lambda task: task.priority)
+            self.tasks.remove(highest_priority_task)
+            return highest_priority_task
         else:
             return None
     
@@ -35,6 +38,9 @@ class Scheduler:
             if not resource.is_busy():
                 return resource
         return None
-
-    def all_tasks_completed(self):
-        return len(self.tasks)
+    
+    def mark_all_tasks_completed(self):
+        self.all_tasks_completed = True
+    
+    def is_all_tasks_completed(self):
+        return len(self.tasks) == 0 and all([resource.is_busy() for resource in self.resources])
