@@ -4,7 +4,7 @@ import threading, time, random
 
 class Scheduler:
     def __init__(self, num_resources, num_projects):
-        self.tasks = [Task(project=f"Project {i}") for i in range(1, num_projects+1)]
+        self.tasks = [Task(project=f"Project {i}", priority=i) for i in range(1, num_projects+1)]
         self.resources = [Resource(i) for i in range(1, num_resources+1)]
         self.lock = threading.Lock()
     
@@ -19,10 +19,13 @@ class Scheduler:
                 else:
                     self.tasks.append(task)
                 self.lock.release()
+            if self.all_tasks_completed == 0:
+                return 
             time.sleep(random.randint(1, 3))
     
     def get_next_task(self):
         if len(self.tasks) > 0:
+            self.tasks.sort(key=lambda x: x.priority, reverse=True)
             return self.tasks.pop(0)
         else:
             return None

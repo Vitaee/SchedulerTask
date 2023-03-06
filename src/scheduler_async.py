@@ -4,7 +4,7 @@ import asyncio, time, random
 
 class Scheduler:
     def __init__(self, num_resources, num_projects):
-        self.tasks = [Task(project=f"Project {i}") for i in range(1, num_projects+1)]
+        self.tasks = [Task(project=f"Project {i}", priority=i) for i in range(1, num_projects+1)]
         self.resources = [Resource(i) for i in range(1, num_resources+1)]
     
     async def assign_task_to_resource(self):
@@ -22,7 +22,7 @@ class Scheduler:
     
     def get_next_task(self):
         if len(self.tasks) > 0:
-            return self.tasks.pop(0)
+            return max(self.tasks, key=lambda x: x.priority)
         else:
             return None
     
